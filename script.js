@@ -36,7 +36,7 @@ class CounterView {
     }
 
     #mountCounter(initData) {
-        this.counter = this.#createCounter(data)
+        this.counter = this.#createCounter(initData)
         this.#mountToRoot(this.counter)
     }
 
@@ -54,16 +54,34 @@ class CounterView {
 
 class CounterModel {
     constructor() {
-        this.count = 0
+        this.defaultValue = 0
         this.storageFieldKey = 'count'
     }
+
+    #isCountValid = (conunt) => !isNaN(conunt) && typeof conunt === 'number'
 
     setCount(data) {
         localStorage.setItem(this.storageFieldKey, data)
     }
 
+    #setDefaultCount() {
+        this.setCount(this.defaultValue)
+    }
+
+    #getCountCandidate() {
+        return Number(localStorage.getItem(this.storageFieldKey))
+    }
+
     getCount() {
-        localStorage.getItem(this.storageFieldKey)
+        const candidate = this.#getCountCandidate()
+
+        if (this.#isCountValid(candidate)) {
+            return candidate
+        }
+
+        this.#setDefaultCount()
+
+        return this.#getCountCandidate()
     }
 }
 
@@ -73,28 +91,17 @@ class CounterController {
         this.model = model
     }
 
-    #isCountValid() {
-        if (isNaN(conunt)) {
-            console.error('Сount cannot be cast to a number!')
-            return false
-        }
-
-        return true
-    }
-
     #changeCount(action) {
         const conunt = Number(this.model.getCount())
-        if (this.#isCountValid) {
-            this.model.setCount(action(conunt))
-        }
+        this.model.setCount(action(conunt))
+        this.view.updateCounter(this.model.getCount())
     }
 
     #incCount = () => this.#changeCount((count) => ++count)
 
-    #decCount = () => () => this.#changeCount((count) => --count)
+    #decCount = () => this.#changeCount((count) => --count)
 
     init() {
-        this.model.init()
         this.view.init({
             counterData: this.model.getCount(),
             leftBtuttonHandler: this.#decCount,
@@ -104,6 +111,9 @@ class CounterController {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    const counter = new CounterController(new CounterView(), new CounterModel())
-    counter.init
+    const counter = new CounterController({
+        view: new CounterView(),
+        model: new CounterModel(),
+    })
+    counter.init()
 })
