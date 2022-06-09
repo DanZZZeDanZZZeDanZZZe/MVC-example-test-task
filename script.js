@@ -92,7 +92,7 @@ class CounterController {
     }
 
     #changeCount(action) {
-        const conunt = Number(this.model.getCount())
+        const conunt = this.model.getCount()
         this.model.setCount(action(conunt))
         this.view.updateCounter(this.model.getCount())
     }
