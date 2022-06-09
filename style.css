@@ -10,3 +10,8 @@ html {
     align-items: center;
     justify-content: center;
 }
+
+#root > * {
+    margin: 0 0.3rem;
+    font-size: 1.2rem;
+}
