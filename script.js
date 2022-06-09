@@ -35,6 +35,10 @@ class CounterView {
         this.#mountButton('+', handler)
     }
 
+    #mountClearButton(handler) {
+        this.#mountButton('Clear', handler)
+    }
+
     #mountCounter(initData) {
         this.counter = this.#createCounter(initData)
         this.#mountToRoot(this.counter)
@@ -44,11 +48,17 @@ class CounterView {
         this.counter.innerText = newData
     }
 
-    init({ counterData, leftBtuttonHandler, rightBtuttonHandler }) {
+    init({
+        counterData,
+        leftBtuttonHandler,
+        rightBtuttonHandler,
+        clearBtuttonHandler,
+    }) {
         this.root = document.getElementById('root')
         this.#mountLeftButton(leftBtuttonHandler)
         this.#mountCounter(counterData)
         this.#mountRightButton(rightBtuttonHandler)
+        this.#mountClearButton(clearBtuttonHandler)
     }
 }
 
@@ -64,7 +74,7 @@ class CounterModel {
         localStorage.setItem(this.storageFieldKey, data)
     }
 
-    #setDefaultCount() {
+    setDefaultCount() {
         this.setCount(this.defaultValue)
     }
 
@@ -79,7 +89,7 @@ class CounterModel {
             return candidate
         }
 
-        this.#setDefaultCount()
+        this.setDefaultCount()
 
         return this.#getCountCandidate()
     }
@@ -101,11 +111,18 @@ class CounterController {
 
     #decCount = () => this.#changeCount((count) => --count)
 
+    #setDefaultCount = () =>
+        this.#changeCount(() => {
+            this.model.setDefaultCount()
+            return this.model.getCount()
+        })
+
     init() {
         this.view.init({
             counterData: this.model.getCount(),
             leftBtuttonHandler: this.#decCount,
             rightBtuttonHandler: this.#incCount,
+            clearBtuttonHandler: this.#setDefaultCount,
         })
     }
 }
